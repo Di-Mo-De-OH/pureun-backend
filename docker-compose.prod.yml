@@ -50,4 +50,8 @@ services:
 volumes:
   postgres_data:
   certbot_conf:
+    external: true
+    name: vintage-house-reborn_certbot_conf
   certbot_www:
+    external: true
+    name: vintage-house-reborn_certbot_www
