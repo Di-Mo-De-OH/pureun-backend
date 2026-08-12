@@ -136,6 +136,7 @@ make check    # 전체 검사 (format + type + test)
 | CI | develop, main PR | lint + test 자동 검사 + Discord 알림 |
 | CD | main push | 빌드 → Docker Hub → EC2 자동 배포 + Discord 알림 |
 
-배포는 기존 `vintage-house-reborn`이 떠 있는 EC2에 서브도메인(`pureun-api.ohdimode.com`)으로 함께 올라갑니다.
-이 레포의 `docker-compose.prod.yml`은 자체 nginx를 띄우지 않고 `8002` 포트로만 노출하며,
-EC2에 이미 떠 있는 nginx에 `nginx/nginx.conf`의 서버 블록을 수동으로 추가해야 합니다 (자세한 내용은 해당 파일 주석 참고).
+- **API 문서(운영)**: https://api.ohdimode.com/docs
+- HTTPS(Let's Encrypt) + nginx 리버스 프록시, AWS EC2(Elastic IP 고정) 배포
+
+`vintage-house-reborn` 프로젝트를 폐기하고 같은 EC2 서버/도메인(`api.ohdimode.com`)을 이어받아 운영합니다.
