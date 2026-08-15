@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 # alembic이 테이블을 인식하려면 모델이 반드시 import돼 있어야 함
 import app.auth.models  # noqa: F401
+import app.products.models  # noqa: F401
 from alembic import context
 from app.core.config import settings
 from app.core.database import BaseModel
