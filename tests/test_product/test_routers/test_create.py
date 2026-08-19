@@ -17,6 +17,7 @@ async def test_create_product(client: AsyncClient, db: AsyncSession, admin_user:
             "name": "산지직송 코코넛",
             "supplier_code": "늘푸른",
             "options": [{"option_name": "1kg", "price": 9000, "stock": 10}],
+            "image_keys": ["products/01M07YY54WWGFSBDS9P8XQX2E5.jpeg"],
         },
     )
     assert response.status_code == status.HTTP_201_CREATED
@@ -32,6 +33,7 @@ async def test_create_product_forbidden(client: AsyncClient, db: AsyncSession, n
             "name": "산지직송 코코넛",
             "supplier_code": "늘푸른",
             "options": [{"option_name": "1kg", "price": 9000, "stock": 10}],
+            "image_keys": ["products/01M07YY54WWGFSBDS9P8XQX2E5.jpeg"],
         },
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN

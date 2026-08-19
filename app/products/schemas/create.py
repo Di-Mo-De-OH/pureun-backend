@@ -32,7 +32,7 @@ class ProductCreateRequest(BaseModel):
     supplier_code: str = Field(examples=["상품 코드"])
     options: list[ProductOptionCreate] = Field(min_length=1)
     label: ProductLabelCreate | None = None
-    image_keys: list[str] = []
+    image_keys: list[str] = Field(min_length=1)
 
 
 class ProductCreateResponse(BaseModel):
