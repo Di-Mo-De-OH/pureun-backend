@@ -1,7 +1,7 @@
 from enum import Enum
 
 from sqlalchemy import Boolean, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import BaseModel
 
@@ -22,6 +22,10 @@ class Product(BaseModel):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     supplier_code: Mapped[str] = mapped_column(String(50), index=True)
+
+    options: Mapped[list["ProductOption"]] = relationship()
+    images: Mapped[list["ProductImage"]] = relationship()
+    label: Mapped["ProductLabel"] = relationship()
 
 
 class ProductImage(BaseModel):
