@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
 from app.core.utils.security import hash_password
-from app.products.models import Category, Product, ProductImage, ProductOption
+from app.products.models import Category, Product, ProductImage, ProductLabel, ProductOption
 
 
 @pytest.fixture
@@ -59,6 +59,21 @@ async def product_1(db: AsyncSession) -> Product:
             sort_order=0,
         )
     )
+    db.add(
+        ProductLabel(
+            product_id=product.id,
+            item_name="냉동 오징어",
+            manufacturer="올바다수산",
+            origin="국내산",
+            expiration_info="제조일로부터 12개월",
+            item_group_notice="수산물 가공식품",
+            imported_food_notice="해당사항없음",
+            composition="오징어 100%",
+            storage_method="냉동보관(-18℃ 이하)",
+            safety_caution="해동 후 재냉동 금지",
+            customer_service_phone="1577-0000",
+        )
+    )
 
     await db.commit()
     return product
@@ -88,6 +103,21 @@ async def product_2(db: AsyncSession) -> Product:
             product_id=product.id,
             image_key="products/test-thumbnail-2.jpg",
             sort_order=0,
+        )
+    )
+    db.add(
+        ProductLabel(
+            product_id=product.id,
+            item_name="냉동 오징어",
+            manufacturer="올바다수산",
+            origin="국내산",
+            expiration_info="제조일로부터 12개월",
+            item_group_notice="수산물 가공식품",
+            imported_food_notice="해당사항없음",
+            composition="오징어 100%",
+            storage_method="냉동보관(-18℃ 이하)",
+            safety_caution="해동 후 재냉동 금지",
+            customer_service_phone="1577-0000",
         )
     )
 
@@ -120,6 +150,21 @@ async def product_3(db: AsyncSession) -> Product:
             product_id=product.id,
             image_key="products/test-thumbnail-3.jpg",
             sort_order=0,
+        )
+    )
+    db.add(
+        ProductLabel(
+            product_id=product.id,
+            item_name="냉동 오징어",
+            manufacturer="올바다수산",
+            origin="국내산",
+            expiration_info="제조일로부터 12개월",
+            item_group_notice="수산물 가공식품",
+            imported_food_notice="해당사항없음",
+            composition="오징어 100%",
+            storage_method="냉동보관(-18℃ 이하)",
+            safety_caution="해동 후 재냉동 금지",
+            customer_service_phone="1577-0000",
         )
     )
 
