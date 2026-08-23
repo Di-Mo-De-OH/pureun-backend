@@ -34,4 +34,3 @@ class ProductUpdateRequest(BaseModel):
     options: list[ProductOptionUpdate] = Field(min_length=1)
     images: list[ProductImageUpdate] = Field(min_length=1)
     label: ProductLabelUpdate
-
