@@ -76,6 +76,7 @@ async def product_1(db: AsyncSession) -> Product:
     )
 
     await db.commit()
+    await db.refresh(product, attribute_names=["options", "images", "label"])
     return product
 
 
