@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
+
 from app.products.models import Category
+
 
 class ProductOptionUpdate(BaseModel):
     id: str | None = Field(default=None, examples=["01M07YY54WWGFSBDS9P8XQX2E5"])
@@ -8,10 +10,12 @@ class ProductOptionUpdate(BaseModel):
     discount_price: int | None = Field(default=None, examples=[8000])
     stock: int = Field(examples=[10])
 
+
 class ProductImageUpdate(BaseModel):
     id: str | None = Field(default=None, examples=["01M07YY54WWGFSBDS9P8XQX2E5"])
     image_key: str = Field(examples=["products/01M07YY54WWGFSBDS9P8XQX2E5.jpeg"])
     sort_order: int = Field(examples=[0])
+
 
 class ProductLabelUpdate(BaseModel):
     item_name: str = Field(examples=["상품명"])
@@ -24,6 +28,7 @@ class ProductLabelUpdate(BaseModel):
     storage_method: str = Field(examples=["저장 방식"])
     safety_caution: str = Field(examples=["안전 주의"])
     customer_service_phone: str = Field(examples=["판매자 전화번호"])
+
 
 class ProductUpdateRequest(BaseModel):
     category: Category = Field(examples=["수산물"])
