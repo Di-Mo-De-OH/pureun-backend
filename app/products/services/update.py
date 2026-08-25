@@ -49,9 +49,9 @@ async def update_product(db: AsyncSession, product_id: str, request: ProductUpda
         existing_img_ids = {img.id: img for img in product.images}
         for img_data in request.images:
             if img_data.id is not None and img_data.id in existing_img_ids:
-                existing = existing_img_ids[img_data.id]
-                existing.image_key = img_data.image_key
-                existing.sort_order = img_data.sort_order
+                existing_img = existing_img_ids[img_data.id]
+                existing_img.image_key = img_data.image_key
+                existing_img.sort_order = img_data.sort_order
 
             else:
                 db.add(ProductImage(product_id=product.id, **img_data.model_dump(exclude={"id"})))
