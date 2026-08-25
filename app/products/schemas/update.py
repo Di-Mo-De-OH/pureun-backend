@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 from app.products.models import Category
@@ -39,3 +41,7 @@ class ProductUpdateRequest(BaseModel):
     options: list[ProductOptionUpdate] = Field(min_length=1)
     images: list[ProductImageUpdate] = Field(min_length=1)
     label: ProductLabelUpdate
+
+
+class ProductUpdateResponse(BaseModel):
+    updated_at: datetime = Field(examples=["2021-07-20T08:50:00"])
