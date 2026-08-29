@@ -12,6 +12,7 @@ from app.products.schemas.create import ProductCreateRequest, ProductCreateRespo
 from app.products.schemas.read import ProductDetailResponse, ProductSummaryResponse
 from app.products.schemas.update import ProductUpdateRequest, ProductUpdateResponse
 from app.products.services.create import create_product
+from app.products.services.delete import delete_product
 from app.products.services.read import get_product_detail, get_products
 from app.products.services.update import update_product
 from app.products.utils.responses import PRODUCT_CREATE_RESPONSES
@@ -55,3 +56,8 @@ async def update_product_router(
     db: DbSession, product_id: str, request: ProductUpdateRequest, admin_user: User = Depends(get_admin_user)
 ) -> Product:
     return await update_product(db, product_id, request)
+
+
+@router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_product_router(db: DbSession, product_id: str, admin_user: User = Depends(get_admin_user)) -> None:
+    await delete_product(db, product_id)
