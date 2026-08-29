@@ -23,9 +23,9 @@ class Product(BaseModel):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     supplier_code: Mapped[str] = mapped_column(String(50), index=True)
 
-    options: Mapped[list["ProductOption"]] = relationship()
-    images: Mapped[list["ProductImage"]] = relationship()
-    label: Mapped["ProductLabel"] = relationship()
+    options: Mapped[list["ProductOption"]] = relationship(passive_deletes=True)
+    images: Mapped[list["ProductImage"]] = relationship(passive_deletes=True)
+    label: Mapped["ProductLabel"] = relationship(passive_deletes=True)
 
 
 class ProductImage(BaseModel):
