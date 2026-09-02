@@ -12,7 +12,7 @@ async def test_cart_delete(client: AsyncClient, normal_user: User, product_1: Pr
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
 
-async def test_cart_delete_invalid_option(client: AsyncClient,normal_user: User) -> None:
+async def test_cart_delete_invalid_option(client: AsyncClient, normal_user: User) -> None:
     headers = await login(client, normal_user)
     response = await client.delete("/api/v1/cart/invalid-option_id", headers=headers)
     assert response.status_code == status.HTTP_204_NO_CONTENT
