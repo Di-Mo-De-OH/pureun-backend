@@ -31,7 +31,7 @@ async def get_cart_image(db: AsyncSession, product_ids: list[str]) -> dict[str, 
     return {image.product_id: image.image_key for image in result.scalars().all()}
 
 
-async def get_cart_read(db: AsyncSession, user_id: str) -> CartReadResponse:
+async def cart_read(db: AsyncSession, user_id: str) -> CartReadResponse:
     cart = await get_cart(user_id)
     if not cart:
         return CartReadResponse(items=[], total_price=0)
