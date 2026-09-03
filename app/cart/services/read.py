@@ -1,3 +1,5 @@
+from typing import cast
+
 from fastapi import HTTPException, status
 from redis.exceptions import RedisError
 from sqlalchemy import select
@@ -16,7 +18,7 @@ async def get_cart(user_id: str) -> dict[str, str]:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="일시적으로 서비스를 사용할 수 없습니다."
         )
-    return cart
+    return cast(dict[str, str], cart)
 
 
 async def get_cart_options(db: AsyncSession, option_ids: list[str]) -> dict[str, ProductOption]:
