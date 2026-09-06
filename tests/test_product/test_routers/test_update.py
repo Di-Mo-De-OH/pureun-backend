@@ -26,7 +26,7 @@ async def test_product_update(db: AsyncSession, client: AsyncClient, product_1: 
                 {"option_name": "500g", "price": 5000, "discount_price": None, "stock": 20},
             ],
             "images": [
-                {"id": existing_image_id, "image_key": "products/test-thumbnail.jpg", "sort_order": 0},
+                {"id": existing_image_id, "image_key": "products/test-thumbnail.jpg"},
             ],
             "label": {
                 "item_name": "냉동 오징어",
@@ -79,7 +79,7 @@ async def test_product_update_with_out_admin_user(
                 {"option_name": "500g", "price": 5000, "discount_price": None, "stock": 20},
             ],
             "images": [
-                {"id": existing_image_id, "image_key": "products/test-thumbnail.jpg", "sort_order": 0},
+                {"id": existing_image_id, "image_key": "products/test-thumbnail.jpg"},
             ],
             "label": {
                 "item_name": "냉동 오징어",
@@ -119,7 +119,7 @@ async def test_product_update_invalid_product_id(
                 {"option_name": "500g", "price": 5000, "discount_price": None, "stock": 20},
             ],
             "images": [
-                {"id": existing_image_id, "image_key": "products/test-thumbnail.jpg", "sort_order": 0},
+                {"id": existing_image_id, "image_key": "products/test-thumbnail.jpg"},
             ],
             "label": {
                 "item_name": "냉동 오징어",
@@ -192,7 +192,7 @@ async def test_product_update_with_out_option(
             "supplier_code": "SUP001",
             "options": [],
             "images": [
-                {"id": existing_image_id, "image_key": "products/test-thumbnail.jpg", "sort_order": 0},
+                {"id": existing_image_id, "image_key": "products/test-thumbnail.jpg"},
             ],
             "label": {
                 "item_name": "냉동 오징어",
@@ -209,3 +209,51 @@ async def test_product_update_with_out_option(
         },
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def test_product_update_invalid_sort_order(
+    db: AsyncSession, client: AsyncClient, product_4: Product, admin_user: User
+) -> None:
+    headers = await login(client, admin_user)
+    existing_option_id = product_4.options[0].id
+    existing_image_first_image_id = product_4.images[0].id
+    existing_image_secondes_image_id = product_4.images[1].id
+    response = await client.put(
+        f"/api/v1/products/{product_4.id}",
+        headers=headers,
+        json={
+            "category": "수산물",
+            "name": "산지직송 오징어",
+            "description": "수정된 설명",
+            "is_active": True,
+            "supplier_code": "SUP001",
+            "options": [
+                {"id": existing_option_id, "option_name": "1kg", "price": 9000, "discount_price": 7000, "stock": 5},
+                {"option_name": "500g", "price": 5000, "discount_price": None, "stock": 20},
+            ],
+            "images": [
+                {"id": existing_image_first_image_id, "image_key": "products/test-thumbnail1.jpg", "sort_order": 1},
+                {"id": existing_image_secondes_image_id, "image_key": "products/test-thumbnail2.jpg", "sort_order": 2},
+            ],
+            "label": {
+                "item_name": "냉동 오징어",
+                "manufacturer": "올바다수산",
+                "origin": "국내산",
+                "expiration_info": "제조일로부터 12개월",
+                "item_group_notice": "수산물 가공식품",
+                "imported_food_notice": "해당사항없음",
+                "composition": "오징어 100%",
+                "storage_method": "냉동보관(-18℃ 이하)",
+                "safety_caution": "해동 후 재냉동 금지",
+                "customer_service_phone": "1577-0000",
+            },
+        },
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    detail_response = await client.get(f"/api/v1/products/{product_4.id}")
+    detail = detail_response.json()
+
+    images_by_key = {img["image_key"]: img for img in detail["images"]}
+    assert images_by_key["products/test-thumbnail1.jpg"]["sort_order"] == 0
+    assert images_by_key["products/test-thumbnail2.jpg"]["sort_order"] == 1

@@ -16,7 +16,6 @@ class ProductOptionUpdate(BaseModel):
 class ProductImageUpdate(BaseModel):
     id: str | None = Field(default=None, examples=["01M07YY54WWGFSBDS9P8XQX2E5"])
     image_key: str = Field(examples=["products/01M07YY54WWGFSBDS9P8XQX2E5.jpeg"])
-    sort_order: int = Field(examples=[0])
 
 
 class ProductLabelUpdate(BaseModel):

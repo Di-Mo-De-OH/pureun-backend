@@ -52,7 +52,7 @@ async def update_product(db: AsyncSession, product_id: str, request: ProductUpda
 
         existing_img_ids = {img.id: img for img in product.images}
         # id 값을 키로 ProductImage 객체를 가져옴 ex) {"img_id":ProductImage객체}
-        for img_data in request.images:
+        for sort_order, img_data in enumerate(request.images):
             # 요청받은 데이터를 img_data에 담는 과정
             if img_data.id is not None and img_data.id in existing_img_ids:
                 # 해당 데이터의 id값이 있고 db에 존재한다면
@@ -61,11 +61,13 @@ async def update_product(db: AsyncSession, product_id: str, request: ProductUpda
                 # (딕셔너리 아님,객체라서 .필드명으로 접근가능 즉 속성으로 접근가능)
                 existing_img.image_key = img_data.image_key
                 # 실제 데이터를 요청받은 데이터로 덮음
-                existing_img.sort_order = img_data.sort_order
+                existing_img.sort_order = sort_order
                 # 실제 데이터를 요청받은 데이터로 덮음
 
             else:
-                db.add(ProductImage(product_id=product.id, **img_data.model_dump(exclude={"id"})))
+                db.add(
+                    ProductImage(product_id=product.id, sort_order=sort_order, **img_data.model_dump(exclude={"id"}))
+                )
                 # 만약 요청받은 id값이 db에 존재하지 않는다면 새로운 로우로 데이터를 만듦
 
         label_data = request.label.model_dump()
