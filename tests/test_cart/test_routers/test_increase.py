@@ -56,7 +56,7 @@ async def test_cart_increase_invalid_option_id(client: AsyncClient, db: AsyncSes
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-async def test_cart_increase_unauthorized(client: AsyncClient, product_1: Product, db: AsyncSession) -> None:
+async def test_cart_increase_unauthorized(client: AsyncClient, product_1: Product) -> None:
     option_id = product_1.options[0].id
     response = await client.post(
         f"api/v1/cart/{option_id}/increase",
