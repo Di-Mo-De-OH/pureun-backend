@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.cart.schemas.read import CartOptionsReadResponse, CartReadResponse
 from app.cart.utils.redis import CartRedis
 from app.core.redis import redis_client
-from app.products.models import ProductImage, ProductOption
+from app.products.models import Product, ProductImage, ProductOption
 
 
 async def get_cart(user_id: str) -> dict[str, str]:
@@ -22,7 +22,12 @@ async def get_cart(user_id: str) -> dict[str, str]:
 
 
 async def get_cart_options(db: AsyncSession, option_ids: list[str]) -> dict[str, ProductOption]:
-    stmt = select(ProductOption).where(ProductOption.id.in_(option_ids))
+    stmt = (
+        select(ProductOption)
+        .join(Product, Product.id == ProductOption.product_id)
+        .where(ProductOption.id.in_(option_ids), Product.is_active.is_(True))
+    )
+
     result = await db.execute(stmt)
     return {option.id: option for option in result.scalars().all()}
 

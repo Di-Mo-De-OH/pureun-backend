@@ -1,6 +1,6 @@
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
@@ -87,6 +87,24 @@ async def test_cart_read_skips_ghost_item(
     await client.post("/api/v1/cart", headers=header, json={"option_id": option_id, "quantity": 1})
 
     await db.execute(delete(Product).where(Product.id == product_1.id))
+    await db.commit()
+
+    response = await client.get("/api/v1/cart", headers=header)
+    body = response.json()
+
+    assert response.status_code == status.HTTP_200_OK
+    assert body["items"] == []
+    assert body["total_price"] == 0
+
+
+async def test_cart_read_skips_inactive_product(
+    client: AsyncClient, db: AsyncSession, product_1: Product, normal_user: User
+) -> None:
+    header = await login(client, normal_user)
+    option_id = product_1.options[0].id
+    await client.post("/api/v1/cart", headers=header, json={"option_id": option_id, "quantity": 1})
+
+    await db.execute(update(Product).where(Product.id == product_1.id).values(is_active=False))
     await db.commit()
 
     response = await client.get("/api/v1/cart", headers=header)
