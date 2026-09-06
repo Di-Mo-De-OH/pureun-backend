@@ -29,11 +29,11 @@ async def cart_read_router(db: DbSession, user: User = Depends(get_user)) -> Car
     return await cart_read(db, user.id)
 
 
-@router.put("/{option_id}/increase", status_code=status.HTTP_200_OK, response_model=CartIncreaseResponse)
+@router.post("/{option_id}/increase", status_code=status.HTTP_200_OK, response_model=CartIncreaseResponse)
 async def cart_increase_router(db: DbSession, option_id: str, user: User = Depends(get_user)) -> CartIncreaseResponse:
     return await cart_increase(db, option_id, user.id)
 
 
-@router.put("/{option_id}/decrease", status_code=status.HTTP_200_OK, response_model=CartDecreaseResponse)
+@router.post("/{option_id}/decrease", status_code=status.HTTP_200_OK, response_model=CartDecreaseResponse)
 async def cart_decrease_router(option_id: str, user: User = Depends(get_user)) -> CartDecreaseResponse:
     return await cart_decrease(option_id, user.id)
