@@ -9,7 +9,11 @@ from app.core.redis import redis_client
 from app.products.models import ProductOption
 
 
-async def cart_increase(db: AsyncSession, option_id: str,user_id: str, ) -> CartIncreaseResponse:
+async def cart_increase(
+    db: AsyncSession,
+    option_id: str,
+    user_id: str,
+) -> CartIncreaseResponse:
     stmt = select(ProductOption).where(ProductOption.id == option_id)
     result = await db.execute(stmt)
     option = result.scalar_one_or_none()
@@ -41,7 +45,10 @@ async def cart_increase(db: AsyncSession, option_id: str,user_id: str, ) -> Cart
     return CartIncreaseResponse(quantity=new_quantity)
 
 
-async def cart_decrease(option_id: str,user_id: str, ) -> CartDecreaseResponse:
+async def cart_decrease(
+    option_id: str,
+    user_id: str,
+) -> CartDecreaseResponse:
     try:
         existing = await redis_client.hget(CartRedis.cart(user_id), option_id)
     except RedisError:
