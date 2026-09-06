@@ -96,7 +96,7 @@ async def product_2(db: AsyncSession) -> Product:
             option_name="3kg",
             price=15000,
             discount_price=None,
-            stock=20,
+            stock=1,
         )
     )
     db.add(
@@ -123,6 +123,7 @@ async def product_2(db: AsyncSession) -> Product:
     )
 
     await db.commit()
+    await db.refresh(product, attribute_names=["options", "images", "label"])
     return product
 
 
