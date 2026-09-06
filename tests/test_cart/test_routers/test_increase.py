@@ -79,3 +79,15 @@ async def test_cart_increase_over_stock(
     )
     assert response1.status_code == status.HTTP_200_OK
     assert response2.status_code == status.HTTP_400_BAD_REQUEST
+
+
+async def test_cart_increase_inactive_product(
+    client: AsyncClient, db: AsyncSession, product_3: Product, normal_user: User
+) -> None:
+    option_id = product_3.options[0].id
+    headers = await login(client, normal_user)
+    response = await client.post(
+        f"api/v1/cart/{option_id}/increase",
+        headers=headers,
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND

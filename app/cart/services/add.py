@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.cart.schemas.add import CartAddResponse
 from app.cart.utils.redis import CART_EXPIRE, CartRedis
 from app.core.redis import redis_client
-from app.products.models import ProductOption
+from app.products.models import Product, ProductOption
 
 
 async def cart_add(
@@ -15,7 +15,11 @@ async def cart_add(
     user_id: str,
     quantity: int,
 ) -> CartAddResponse:
-    stmt = select(ProductOption).where(ProductOption.id == option_id)
+    stmt = (
+        select(ProductOption)
+        .join(Product, Product.id == ProductOption.product_id)
+        .where(ProductOption.id == option_id, Product.is_active.is_(True))
+    )
     result = await db.execute(stmt)
     option = result.scalar_one_or_none()
 
