@@ -8,5 +8,6 @@ class OrderBuyNowRequest(BaseModel):
 
 class OrderBuyNowResponse(BaseModel):
     order_id: str
+    thumbnail_image_key: str
     amount: int
     order_name: str
