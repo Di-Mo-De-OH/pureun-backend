@@ -1,0 +1,13 @@
+from pydantic import BaseModel
+
+from app.order.models import Status
+
+
+class OrderConfirmRequest(BaseModel):
+    payment_key: str
+    order_id: str
+    amount: int
+
+
+class OrderConfirmResponse(BaseModel):
+    status: Status
