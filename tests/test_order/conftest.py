@@ -1,8 +1,10 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.auth.models import User
 from app.core.utils.security import hash_password
 from app.products.models import Category, Product, ProductImage, ProductLabel, ProductOption
+
 
 @pytest.fixture
 async def normal_user(db: AsyncSession) -> User:
@@ -15,6 +17,7 @@ async def normal_user(db: AsyncSession) -> User:
     db.add(user)
     await db.commit()
     return user
+
 
 @pytest.fixture
 async def product_1(db: AsyncSession) -> Product:
@@ -61,6 +64,7 @@ async def product_1(db: AsyncSession) -> Product:
     await db.commit()
     await db.refresh(product, attribute_names=["options", "images", "label"])
     return product
+
 
 @pytest.fixture
 async def product_3(db: AsyncSession) -> Product:
