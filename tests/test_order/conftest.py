@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
 from app.core.utils.security import hash_password
+from app.order.models import Order, OrderItem
 from app.products.models import Category, Product, ProductImage, ProductLabel, ProductOption
 
 
@@ -13,6 +14,19 @@ async def normal_user(db: AsyncSession) -> User:
         hashed_password=hash_password("Password@1"),
         name="user",
         nickname="user",
+    )
+    db.add(user)
+    await db.commit()
+    return user
+
+
+@pytest.fixture
+async def normal_user2(db: AsyncSession) -> User:
+    user = User(
+        email="user2@example.com",
+        hashed_password=hash_password("Password@1"),
+        name="user2",
+        nickname="user2",
     )
     db.add(user)
     await db.commit()
@@ -112,3 +126,30 @@ async def product_3(db: AsyncSession) -> Product:
     await db.commit()
     await db.refresh(product, attribute_names=["options", "images", "label"])
     return product
+
+
+@pytest.fixture
+async def order_1(db: AsyncSession, normal_user: User, product_1: Product) -> Order:
+    option = product_1.options[0]
+    assert option.discount_price is not None
+    order = Order(
+        user_id=normal_user.id,
+        amount=option.discount_price * 2,
+        order_name=f"{product_1.name} {option.option_name} 2개",
+    )
+    db.add(order)
+    await db.flush()
+
+    db.add(
+        OrderItem(
+            order_id=order.id,
+            option_id=option.id,
+            option_name=option.option_name,
+            price=option.price,
+            discount_price=option.discount_price,
+            quantity=2,
+        )
+    )
+
+    await db.commit()
+    return order
