@@ -5,7 +5,6 @@ from app.order.models import Status
 
 class OrderConfirmRequest(BaseModel):
     payment_key: str
-    order_id: str
     amount: int
 
 
