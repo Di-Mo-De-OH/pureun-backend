@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -46,3 +47,7 @@ def generate_refresh_token() -> str:
 def hash_refresh_token(token: str) -> str:
     """refresh_token 해쉬화 함수"""
     return hashlib.sha256(token.encode()).hexdigest()
+
+
+def get_toss_auth_header() -> str:
+    return base64.b64encode(f"{settings.TOSS_SECRET_KEY}:".encode()).decode()
