@@ -18,13 +18,17 @@ async def call_toss_confirm(payment_key: str, order_id: str, amount: int) -> htt
         )
 
 
-async def order_confirm(db: AsyncSession, request: OrderConfirmRequest) -> OrderConfirmResponse:
-    stmt = select(Order).where(Order.id == request.order_id)
+async def order_confirm(
+    db: AsyncSession, order_id: str, user_id: str, request: OrderConfirmRequest
+) -> OrderConfirmResponse:
+    stmt = select(Order).where(Order.id == order_id)
     result = await db.execute(stmt)
     order = result.scalar_one_or_none()
     if not order:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="존재하지 않는 주문 입니다.")
 
+    if order.user_id != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="다른 사람의 주문내역은 확인할 수 없습니다.")
     if order.status != Status.PENDING:
         return OrderConfirmResponse(status=order.status)
 
@@ -43,7 +47,7 @@ async def order_confirm(db: AsyncSession, request: OrderConfirmRequest) -> Order
         order.status = Status.PAID
         order.payment_key = request.payment_key
 
-        item_stmt = select(OrderItem).where(OrderItem.order_id == order.id)
+        item_stmt = select(OrderItem).where(OrderItem.order_id == order_id)
         item_result = await db.execute(item_stmt)
         order_items = item_result.scalars().all()
         for item in order_items:
