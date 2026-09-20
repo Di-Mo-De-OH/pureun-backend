@@ -81,6 +81,53 @@ async def product_1(db: AsyncSession) -> Product:
 
 
 @pytest.fixture
+async def product_2(db: AsyncSession) -> Product:
+    product = Product(
+        category=Category.FRUIT,
+        name="제주 감귤",
+        supplier_code="SUP002",
+    )
+    db.add(product)
+    await db.flush()
+
+    db.add(
+        ProductOption(
+            product_id=product.id,
+            option_name="3kg",
+            price=15000,
+            discount_price=None,
+            stock=8,
+        )
+    )
+    db.add(
+        ProductImage(
+            product_id=product.id,
+            image_key="products/test-thumbnail-2.jpg",
+            sort_order=0,
+        )
+    )
+    db.add(
+        ProductLabel(
+            product_id=product.id,
+            item_name="제주 감귤",
+            manufacturer="제주농협",
+            origin="국내산",
+            expiration_info="수확일로부터 14일",
+            item_group_notice="농산물",
+            imported_food_notice="해당사항없음",
+            composition="감귤 100%",
+            storage_method="서늘한 곳 보관",
+            safety_caution="개봉 후 빠른 시일 내 섭취",
+            customer_service_phone="1577-0000",
+        )
+    )
+
+    await db.commit()
+    await db.refresh(product, attribute_names=["options", "images", "label"])
+    return product
+
+
+@pytest.fixture
 async def product_3(db: AsyncSession) -> Product:
     product = Product(
         category=Category.VEGETABLE,
