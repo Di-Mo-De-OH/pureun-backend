@@ -12,3 +12,7 @@ class OrderCartCheckoutResponse(BaseModel):
     amount: int
     order_name: str
     items: list[OrderCartCheckoutItemResponse]
+
+
+class OrderCartCheckoutRequest(BaseModel):
+    option_ids: list[str]
