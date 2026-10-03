@@ -20,8 +20,7 @@ async def create_product(db: AsyncSession, request: ProductCreateRequest) -> Pro
         for option in request.options:
             db.add(ProductOption(product_id=product.id, **option.model_dump()))
 
-        if request.label:
-            db.add(ProductLabel(product_id=product.id, **request.label.model_dump()))
+        db.add(ProductLabel(product_id=product.id, **request.label.model_dump()))
 
         for sort_order, image_key in enumerate(request.image_keys):
             db.add(ProductImage(product_id=product.id, image_key=image_key, sort_order=sort_order))

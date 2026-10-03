@@ -13,16 +13,16 @@ class ProductOptionCreate(BaseModel):
 
 
 class ProductLabelCreate(BaseModel):
-    item_name: str | None = None
-    manufacturer: str | None = None
-    origin: str | None = None
-    expiration_info: str | None = None
-    item_group_notice: str | None = None
-    imported_food_notice: str | None = None
-    composition: str | None = None
-    storage_method: str | None = None
-    safety_caution: str | None = None
-    customer_service_phone: str | None = None
+    item_name: str = Field(examples=["상품명"])
+    manufacturer: str = Field(examples=["제조업체"])
+    origin: str = Field(examples=["원산지"])
+    expiration_info: str = Field(examples=["유통기한"])
+    item_group_notice: str = Field(examples=["상품군 공지"])
+    imported_food_notice: str = Field(examples=["수입 식품 주의사항"])
+    composition: str = Field(examples=["구성"])
+    storage_method: str = Field(examples=["저장 방식"])
+    safety_caution: str = Field(examples=["안전 주의"])
+    customer_service_phone: str = Field(examples=["판매자 전화번호"])
 
 
 class ProductCreateRequest(BaseModel):
@@ -31,7 +31,7 @@ class ProductCreateRequest(BaseModel):
     description: str | None = Field(examples=["상품 상세설명"], default=None)
     supplier_code: str = Field(examples=["상품 코드"])
     options: list[ProductOptionCreate] = Field(min_length=1)
-    label: ProductLabelCreate | None = None
+    label: ProductLabelCreate
     image_keys: list[str] = Field(min_length=1)
 
 

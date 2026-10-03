@@ -1,5 +1,7 @@
+from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.utils.pagination import CursorPage, CursorPageParams, paginate_by_cursor
 from app.products.models import Product, ProductImage, ProductOption
@@ -55,3 +57,20 @@ async def get_products(db: AsyncSession, params: CursorPageParams) -> CursorPage
         for product in products
     ]
     return CursorPage(items=items, next_cursor=next_cursor)
+
+
+async def get_product_detail(db: AsyncSession, product_id: str) -> Product:
+    stmt = (
+        select(Product)
+        .where(Product.id == product_id)
+        .options(
+            selectinload(Product.options),
+            selectinload(Product.images),
+            selectinload(Product.label),
+        )
+    )
+    result = await db.execute(stmt)
+    product = result.scalar_one_or_none()
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당 상품을 찾을 수 없습니다.")
+    return product

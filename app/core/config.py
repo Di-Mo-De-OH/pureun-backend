@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY_ID: str
     S3_SECRET_ACCESS_KEY: str
 
+    TOSS_SECRET_KEY: str
+
     @property
     def DATABASE_URL(self) -> str:
         password = quote(self.POSTGRES_PASSWORD, safe="")
