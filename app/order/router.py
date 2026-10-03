@@ -1,14 +1,19 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, status
 
 from app.auth.dependencies import get_user
 from app.auth.models import User
 from app.core.database import DbSession
+from app.core.utils.pagination import CursorPage, CursorPageParams
 from app.order.schemas.buy_now import OrderBuyNowRequest, OrderBuyNowResponse
 from app.order.schemas.cart_checkout import OrderCartCheckoutRequest, OrderCartCheckoutResponse
 from app.order.schemas.confirm import OrderConfirmRequest, OrderConfirmResponse
+from app.order.schemas.read import OrderReadListResponse
 from app.order.services.buy_now import order_buy_now
 from app.order.services.cart_checkout import cart_checkout
 from app.order.services.confirm import order_confirm
+from app.order.services.read import get_order_list
 
 router = APIRouter(
     prefix="/orders",
@@ -37,3 +42,12 @@ async def checkout_router(
     user: User = Depends(get_user),
 ) -> OrderCartCheckoutResponse:
     return await cart_checkout(db, user.id, request)
+
+
+@router.get("", response_model=CursorPage[OrderReadListResponse], status_code=status.HTTP_200_OK)
+async def order_list_router(
+    db: DbSession,
+    params: Annotated[CursorPageParams, Depends()],
+    user: User = Depends(get_user),
+) -> CursorPage[OrderReadListResponse]:
+    return await get_order_list(db, user.id, params)
