@@ -12,7 +12,6 @@ class User(BaseModel):
     hashed_password: Mapped[str] = mapped_column(String(255))
     name: Mapped[str] = mapped_column(String(255))
     nickname: Mapped[str] = mapped_column(String(255), unique=True)
-    address: Mapped[str | None] = mapped_column(String(255))
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
 
 
