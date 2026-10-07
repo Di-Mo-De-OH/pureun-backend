@@ -7,6 +7,9 @@ EMAIL_PATTERN = re.compile(r"^[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}$")
 
 NICKNAME_PATTERN = re.compile(r"^[가-힣a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>/?~`]{1,8}$")
 
+PHONE_SEPARATOR_PATTERN = re.compile(r"[-\s]")
+PHONE_PATTERN = re.compile(r"01[016789][0-9]{7,8}")
+
 PASSWORD_MIN_LENGTH = 8
 PASSWORD_MAX_LENGTH = 20
 
@@ -50,7 +53,16 @@ def validate_image_content_type(content_type: str) -> str:
     return content_type
 
 
+def validate_phone(phone: str) -> str:
+    normalized = PHONE_SEPARATOR_PATTERN.sub("", phone)
+    if not PHONE_PATTERN.fullmatch(normalized):
+        raise ValueError("올바른 휴대폰 번호 형식이 아닙니다.")
+    return normalized
+
+
+
 PasswordField = Annotated[str, AfterValidator(validate_password)]
 NicknameField = Annotated[str, AfterValidator(validate_nickname)]
 EmailField = Annotated[str, AfterValidator(validate_email)]
 ImageContentTypeField = Annotated[str, AfterValidator(validate_image_content_type)]
+PhoneField = Annotated[str, AfterValidator(validate_phone)]
