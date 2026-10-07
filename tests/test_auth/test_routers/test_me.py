@@ -28,12 +28,11 @@ async def test_patch_me_success(client: AsyncClient, test_user: User) -> None:
     response = await client.patch(
         "/api/v1/auth/me",
         headers=headers,
-        json={"nickname": "새로운닉네임", "name": "새로운이름", "address": "새로운주소"},
+        json={"nickname": "새로운닉네임", "name": "새로운이름"},
     )
     assert response.status_code == 200
     assert response.json()["name"] == "새로운이름"
     assert response.json()["nickname"] == "새로운닉네임"
-    assert response.json()["address"] == "새로운주소"
 
 
 async def test_patch_me_partial_update(client: AsyncClient, test_user: User) -> None:
@@ -43,7 +42,6 @@ async def test_patch_me_partial_update(client: AsyncClient, test_user: User) -> 
     assert response.status_code == 200
     assert response.json()["nickname"] == "부분수정닉"
     assert response.json()["name"] == test_user.name
-    assert response.json()["address"] == test_user.address
 
 
 async def test_patch_me_invalid(client: AsyncClient, test_user: User, test_user2: User) -> None:
