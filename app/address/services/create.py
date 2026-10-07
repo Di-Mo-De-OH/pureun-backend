@@ -1,39 +1,31 @@
-
-
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.address.schemas.create import AddressCreateRequest
-from app.address.models import Address
+from fastapi import HTTPException, status
 from sqlalchemy import select
-from fastapi import HTTPException,status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.address.models import Address
+from app.address.schemas.create import AddressCreateRequest
+
+MAX_ADDRESS_COUNT = 5
 
 
-
-async def create_address(
-        db:AsyncSession,
-        user_id:str,
-        request:AddressCreateRequest
-)->Address:
+async def create_address(db: AsyncSession, user_id: str, request: AddressCreateRequest) -> Address:
     stmt = select(Address).where(Address.user_id == user_id)
     result = await db.execute(stmt)
-    default_address = result.scalars().all()
-    if len(default_address) >=5:
+    addresses = result.scalars().all()
+    if len(addresses) >= MAX_ADDRESS_COUNT:
         raise HTTPException(
-            status_code = status.HTTP_400_BAD_REQUEST,
-            detail="주소지는 5개가 최대값 입니다."
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"주소지는 {MAX_ADDRESS_COUNT}개가 최대값 입니다."
         )
-    if not default_address:
-        is_default = True
-    else:
-        is_default = False
-
-
+    is_default = request.is_default or not addresses
+    if is_default:
+        for existing in addresses:
+            existing.is_default = False
 
     address = Address(
-        user_id = user_id,
+        user_id=user_id,
         recipient_name=request.recipient_name,
         phone_number=request.phone_number,
-        post_code = request.post_code,
+        post_code=request.post_code,
         base_address=request.base_address,
         detail_address=request.detail_address,
         is_default=is_default,
@@ -42,5 +34,3 @@ async def create_address(
     await db.commit()
 
     return address
-
-
