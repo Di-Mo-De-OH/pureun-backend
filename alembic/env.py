@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 import app.auth.models  # noqa: F401
 import app.order.models  # noqa: F401
 import app.products.models  # noqa: F401
+import app.address.models # noqa: F401
 from alembic import context
 from app.core.config import settings
 from app.core.database import BaseModel
