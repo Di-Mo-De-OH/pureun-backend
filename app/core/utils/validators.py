@@ -60,7 +60,6 @@ def validate_phone(phone: str) -> str:
     return normalized
 
 
-
 PasswordField = Annotated[str, AfterValidator(validate_password)]
 NicknameField = Annotated[str, AfterValidator(validate_nickname)]
 EmailField = Annotated[str, AfterValidator(validate_email)]
