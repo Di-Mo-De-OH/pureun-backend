@@ -15,7 +15,6 @@ async def test_signup_success(client: AsyncClient, db: AsyncSession) -> None:
             "confirm_password": "Password@1",
             "name": "testname",
             "nickname": "testnick",
-            "address": "testaddress",
             "verify_token": "sometoken123",
         },
     )
@@ -32,7 +31,6 @@ async def test_signup_invalid_token(client: AsyncClient) -> None:
             "confirm_password": "Password@1",
             "name": "testname",
             "nickname": "testnick",
-            "address": "testaddress",
             "verify_token": "noting",
         },
     )
@@ -65,7 +63,6 @@ async def test_signup_password_mismatch(client: AsyncClient) -> None:
             "confirm_password": "Password@2",
             "name": "testname",
             "nickname": "testnick",
-            "address": "testaddress",
             "verify_token": "sometoken456",
         },
     )
