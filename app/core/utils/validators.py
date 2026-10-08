@@ -18,6 +18,8 @@ PASSWORD_UPPERCASE_PATTERN = re.compile(r"[A-Z]")
 PASSWORD_DIGIT_PATTERN = re.compile(r"\d")
 PASSWORD_SPECIAL_PATTERN = re.compile(r"[!@#$%^&*()]")
 
+POST_CODE_PATTERN = re.compile(r"[0-9]{5}")
+
 ALLOWED_IMAGE_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 
 
@@ -60,8 +62,15 @@ def validate_phone(phone: str) -> str:
     return normalized
 
 
+def validate_post_code(post_code: str) -> str:
+    if not POST_CODE_PATTERN.fullmatch(post_code):
+        raise ValueError("우편번호는 5자리 숫자여야 합니다.")
+    return post_code
+
+
 PasswordField = Annotated[str, AfterValidator(validate_password)]
 NicknameField = Annotated[str, AfterValidator(validate_nickname)]
 EmailField = Annotated[str, AfterValidator(validate_email)]
 ImageContentTypeField = Annotated[str, AfterValidator(validate_image_content_type)]
 PhoneField = Annotated[str, AfterValidator(validate_phone)]
+PostCodeField = Annotated[str, AfterValidator(validate_post_code)]
