@@ -1,17 +1,19 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
-from app.core.utils.validators import PhoneField
+from app.core.utils.validators import PhoneField, PostCodeField
 
 
 class AddressCreateRequest(BaseModel):
-    recipient_name: str = Field(examples=["수령자명"])
+    model_config = ConfigDict(str_strip_whitespace=True)
+    recipient_name: str = Field(examples=["수령자명"], min_length=1, max_length=30)
     phone_number: PhoneField = Field(examples=["010-0000-0000"])
-    post_code: str = Field(examples=["우편번호"])
-    base_address: str = Field(examples=["서울 마포구 ..."])
-    detail_address: str | None = Field(examples=["101동 101호"], default=None)
+    post_code: PostCodeField = Field(examples=["04048"])
+    base_address: str = Field(examples=["서울 마포구 ..."], min_length=1, max_length=255)
+    detail_address: str | None = Field(examples=["101동 101호"], default=None, max_length=255)
     is_default: bool = Field(default=False)
 
 
 class AddressCreateResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: str
     is_default: bool
