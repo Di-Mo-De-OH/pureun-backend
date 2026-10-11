@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 from fastapi import status
 from httpx import AsyncClient, Response
@@ -14,6 +16,23 @@ async def login(client: AsyncClient, user: User) -> dict[str, str]:
 
 async def add_cart(client: AsyncClient, headers: dict[str, str], option_id: str, quantity: int) -> None:
     await client.post("/api/v1/cart", headers=headers, json={"option_id": option_id, "quantity": quantity})
+
+
+async def create_address(client: AsyncClient, headers: dict[str, str], is_default: bool = False) -> dict[str, Any]:
+    response = await client.post(
+        "/api/v1/addresses",
+        headers=headers,
+        json={
+            "recipient_name": "집",
+            "phone_number": "010-1234-1234",
+            "post_code": "04044",
+            "base_address": "서울특별시 마포구 ...",
+            "detail_address": "2층 ",
+            "is_default": is_default,
+        },
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    return response.json()
 
 
 async def confirm_order(
