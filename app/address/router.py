@@ -5,9 +5,11 @@ from fastapi import APIRouter, Depends, status
 from app.address.models import Address
 from app.address.schemas.create import AddressCreateRequest, AddressCreateResponse
 from app.address.schemas.read import AddressReadResponse
+from app.address.schemas.update import AddressUpdateRequest, AddressUpdateResponse
 from app.address.services.create import create_address
 from app.address.services.delete import delete_address
 from app.address.services.read import read_addresses
+from app.address.services.update import update_address
 from app.auth.dependencies import get_user
 from app.auth.models import User
 from app.core.database import DbSession
@@ -42,3 +44,10 @@ async def delete_address_router(
     user: User = Depends(get_user),
 ) -> None:
     await delete_address(db, address_id, user.id)
+
+
+@router.put("/{address_id}", response_model=AddressUpdateResponse, status_code=status.HTTP_200_OK)
+async def update_address_router(
+    db: DbSession, address_id: str, request: AddressUpdateRequest, user: User = Depends(get_user)
+) -> Address:
+    return await update_address(db, address_id, user.id, request)
