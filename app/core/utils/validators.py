@@ -10,6 +10,9 @@ NICKNAME_PATTERN = re.compile(r"^[가-힣a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':\"\\|,
 PHONE_SEPARATOR_PATTERN = re.compile(r"[-\s]")
 PHONE_PATTERN = re.compile(r"01[016789][0-9]{7,8}")
 
+TRACKING_SEPARATOR_PATTERN = re.compile(r"[\s_-]")
+TRACKING_NUMBER_PATTERN = re.compile(r"[0-9]{8,20}")
+
 PASSWORD_MIN_LENGTH = 8
 PASSWORD_MAX_LENGTH = 20
 
@@ -68,9 +71,17 @@ def validate_post_code(post_code: str) -> str:
     return post_code
 
 
+def validate_tracking_number(tracking_number: str) -> str:
+    normalized = TRACKING_SEPARATOR_PATTERN.sub("", tracking_number)
+    if not TRACKING_NUMBER_PATTERN.fullmatch(normalized):
+        raise ValueError("올바른 송장번호 형식이 아닙니다.")
+    return normalized
+
+
 PasswordField = Annotated[str, AfterValidator(validate_password)]
 NicknameField = Annotated[str, AfterValidator(validate_nickname)]
 EmailField = Annotated[str, AfterValidator(validate_email)]
 ImageContentTypeField = Annotated[str, AfterValidator(validate_image_content_type)]
 PhoneField = Annotated[str, AfterValidator(validate_phone)]
 PostCodeField = Annotated[str, AfterValidator(validate_post_code)]
+TrackingNumberField = Annotated[str, AfterValidator(validate_tracking_number)]
