@@ -1,9 +1,10 @@
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import delete, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
+from app.order.models import Order
 from app.products.models import Product, ProductOption
 from tests.utils import add_cart, assert_delivery_snapshot, create_address, login
 
@@ -197,3 +198,29 @@ async def test_cart_checkout_empty_cart(
         },
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+async def test_cart_checkout_other_user_address(
+    client: AsyncClient,
+    db: AsyncSession,
+    normal_user: User,
+    normal_user2: User,
+    product_1: Product,
+) -> None:
+    headers = await login(client, normal_user)
+    headers_user2 = await login(client, normal_user2)
+    user2_address = await create_address(client, headers_user2)
+    await add_cart(client, headers, product_1.options[0].id, 1)
+
+    response = await client.post(
+        "/api/v1/orders/cart-checkout",
+        headers=headers,
+        json={
+            "option_ids": [product_1.options[0].id],
+            "address_id": user2_address["id"],
+        },
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    stmt = select(Order).where(Order.user_id == normal_user.id)
+    result = await db.execute(stmt)
+    assert result.scalar_one_or_none() is None
