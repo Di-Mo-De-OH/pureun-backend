@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.models import User
 from app.order.models import Order
 from app.products.models import Product
-from tests.utils import add_cart, confirm_order, login
+from tests.utils import add_cart, confirm_order, create_address, login
 
 
 async def test_order_list(
@@ -80,13 +80,17 @@ async def test_order_list_multiple_items(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     headers = await login(client, normal_user)
+    address = await create_address(client, headers)
     await add_cart(client, headers, product_1.options[0].id, 2)
     await add_cart(client, headers, product_2.options[0].id, 1)
 
     checkout_response = await client.post(
         "/api/v1/orders/cart-checkout",
         headers=headers,
-        json={"option_ids": [product_1.options[0].id, product_2.options[0].id]},
+        json={
+            "option_ids": [product_1.options[0].id, product_2.options[0].id],
+            "address_id": address["id"],
+        },
     )
     assert checkout_response.status_code == status.HTTP_201_CREATED
     checkout_body = checkout_response.json()

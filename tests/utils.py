@@ -3,8 +3,11 @@ from typing import Any
 import pytest
 from fastapi import status
 from httpx import AsyncClient, Response
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
+from app.delivery.models import Delivery
 from app.order.models import Order
 
 
@@ -52,3 +55,18 @@ async def confirm_order(
         },
     )
     return response.status_code
+
+
+async def assert_delivery_snapshot(
+    db: AsyncSession,
+    order_id: str,
+) -> None:
+    stmt = select(Delivery).where(Delivery.order_id == order_id)
+    result = await db.execute(stmt)
+    delivery = result.scalar_one()
+    assert delivery.recipient_name == "집"
+    assert delivery.phone_number == "01012341234"
+    assert delivery.post_code == "04044"
+    assert delivery.base_address == "서울특별시 마포구 ..."
+    assert delivery.detail_address == "2층"
+    assert delivery.status == "준비중"
