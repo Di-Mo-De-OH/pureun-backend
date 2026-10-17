@@ -3,6 +3,8 @@ from sqlalchemy import Row, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.address.services.read import get_address
+from app.delivery.services.create import create_delivery
 from app.order.models import Order, OrderItem
 from app.order.schemas.buy_now import OrderBuyNowResponse
 from app.products.models import Product, ProductImage, ProductOption
@@ -28,7 +30,14 @@ async def get_thumbnail_image(db: AsyncSession, product_id: str) -> ProductImage
     return result.scalars().one_or_none()
 
 
-async def order_buy_now(db: AsyncSession, user_id: str, option_id: str, quantity: int) -> OrderBuyNowResponse:
+async def order_buy_now(
+    db: AsyncSession,
+    option_id: str,
+    quantity: int,
+    address_id: str,
+    user_id: str,
+) -> OrderBuyNowResponse:
+    address = await get_address(db, address_id, user_id)
     result = await get_option(db, option_id)
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당 상품을 찾을 수 없습니다.")
@@ -64,6 +73,7 @@ async def order_buy_now(db: AsyncSession, user_id: str, option_id: str, quantity
                 discount_price=option.discount_price,
             )
         )
+        create_delivery(db, order.id, address)
         await db.commit()
     except IntegrityError:
         await db.rollback()

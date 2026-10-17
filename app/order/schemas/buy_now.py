@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 class OrderBuyNowRequest(BaseModel):
     option_id: str
     quantity: int = Field(gt=0)
+    address_id: str
 
 
 class OrderBuyNowResponse(BaseModel):
