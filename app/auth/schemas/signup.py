@@ -10,7 +10,6 @@ class SignUpRequest(BaseModel):
     confirm_password: PasswordField = Field(examples=["Password@1"])
     nickname: NicknameField = Field(examples=["테스트닉네임"])
     name: str = Field(examples=["김리본"])
-    address: str | None = Field(default=None, examples=["서울 마포구 ..."])
     verify_token: str = Field(examples=["Ab3dEfGhIjKlMnOpQrStUvWx1234"])
 
     @model_validator(mode="after")
@@ -26,4 +25,3 @@ class SignUpResponse(BaseModel):
     email: EmailField = Field(examples=["test@example.com"])
     nickname: NicknameField = Field(examples=["테스트닉네임"])
     name: str = Field(examples=["김리본"])
-    address: str | None = Field(default=None, examples=["서울 마포구 ..."])

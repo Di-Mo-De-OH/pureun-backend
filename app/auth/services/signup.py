@@ -25,7 +25,10 @@ async def signup(db: AsyncSession, request: SignUpRequest) -> User:
         )
     password = hash_password(request.password)
     user = User(
-        email=email, hashed_password=password, nickname=request.nickname, name=request.name, address=request.address
+        email=email,
+        hashed_password=password,
+        nickname=request.nickname,
+        name=request.name,
     )
     db.add(user)
 
