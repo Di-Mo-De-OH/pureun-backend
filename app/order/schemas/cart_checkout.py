@@ -16,3 +16,4 @@ class OrderCartCheckoutResponse(BaseModel):
 
 class OrderCartCheckoutRequest(BaseModel):
     option_ids: list[str]
+    address_id: str

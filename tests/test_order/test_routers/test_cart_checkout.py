@@ -1,11 +1,12 @@
 from fastapi import status
 from httpx import AsyncClient
-from sqlalchemy import delete, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import User
+from app.order.models import Order
 from app.products.models import Product, ProductOption
-from tests.utils import add_cart, login
+from tests.utils import add_cart, assert_delivery_snapshot, create_address, login
 
 
 async def test_cart_checkout_product(
@@ -15,6 +16,7 @@ async def test_cart_checkout_product(
     product_1: Product,
 ) -> None:
     headers = await login(client, normal_user)
+    address = await create_address(client, headers)
     await add_cart(client, headers, product_1.options[0].id, 1)
 
     response = await client.post(
@@ -22,12 +24,14 @@ async def test_cart_checkout_product(
         headers=headers,
         json={
             "option_ids": [product_1.options[0].id],
+            "address_id": address["id"],
         },
     )
     assert response.status_code == status.HTTP_201_CREATED
     body = response.json()
     assert body["order_name"] == product_1.name
     assert body["amount"] == product_1.options[0].discount_price * 1
+    await assert_delivery_snapshot(db, body["order_id"])
 
 
 async def test_cart_checkout_products(
@@ -38,6 +42,7 @@ async def test_cart_checkout_products(
     product_2: Product,
 ) -> None:
     headers = await login(client, normal_user)
+    address = await create_address(client, headers)
     await add_cart(client, headers, product_1.options[0].id, 2)
     await add_cart(client, headers, product_2.options[0].id, 1)
 
@@ -46,6 +51,7 @@ async def test_cart_checkout_products(
         headers=headers,
         json={
             "option_ids": [product_1.options[0].id, product_2.options[0].id],
+            "address_id": address["id"],
         },
     )
     assert response.status_code == status.HTTP_201_CREATED
@@ -66,6 +72,7 @@ async def test_cart_checkout_partial_selection(
 ) -> None:
     """장바구니에서 몇가지 옵션 선택 결제"""
     headers = await login(client, normal_user)
+    address = await create_address(client, headers)
     await add_cart(client, headers, product_1.options[0].id, 2)
     await add_cart(client, headers, product_2.options[0].id, 1)
 
@@ -74,6 +81,7 @@ async def test_cart_checkout_partial_selection(
         headers=headers,
         json={
             "option_ids": [product_1.options[0].id],
+            "address_id": address["id"],
         },
     )
     assert response.status_code == status.HTTP_201_CREATED
@@ -97,12 +105,14 @@ async def test_cart_checkout_no_options(
     product_1: Product,
 ) -> None:
     headers = await login(client, normal_user)
+    address = await create_address(client, headers)
     await add_cart(client, headers, product_1.options[0].id, 1)
     response = await client.post(
         "/api/v1/orders/cart-checkout",
         headers=headers,
         json={
             "option_ids": ["invalid-id"],
+            "address_id": address["id"],
         },
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -116,6 +126,7 @@ async def test_cart_checkout_skips_ghost_item(
     product_2: Product,
 ) -> None:
     headers = await login(client, normal_user)
+    address = await create_address(client, headers)
     await add_cart(client, headers, product_1.options[0].id, 1)
     await add_cart(client, headers, product_2.options[0].id, 1)
 
@@ -125,7 +136,10 @@ async def test_cart_checkout_skips_ghost_item(
     response = await client.post(
         "/api/v1/orders/cart-checkout",
         headers=headers,
-        json={"option_ids": [product_1.options[0].id, product_2.options[0].id]},
+        json={
+            "option_ids": [product_1.options[0].id, product_2.options[0].id],
+            "address_id": address["id"],
+        },
     )
     body = response.json()
     assert response.status_code == status.HTTP_201_CREATED
@@ -141,6 +155,7 @@ async def test_cart_checkout_over_stock(
     product_1: Product,
 ) -> None:
     headers = await login(client, normal_user)
+    address = await create_address(client, headers)
     await add_cart(client, headers, product_1.options[0].id, 5)
     await db.execute(update(ProductOption).where(ProductOption.id == product_1.options[0].id).values(stock=3))
     await db.commit()
@@ -149,6 +164,7 @@ async def test_cart_checkout_over_stock(
         headers=headers,
         json={
             "option_ids": [product_1.options[0].id],
+            "address_id": address["id"],
         },
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -161,7 +177,7 @@ async def test_cart_checkout_unauthorized(
 ) -> None:
     response = await client.post(
         "/api/v1/orders/cart-checkout",
-        json={"option_ids": [product_1.options[0].id]},
+        json={"option_ids": [product_1.options[0].id], "address_id": "address-id"},
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -172,11 +188,39 @@ async def test_cart_checkout_empty_cart(
     normal_user: User,
 ) -> None:
     headers = await login(client, normal_user)
+    address = await create_address(client, headers)
     response = await client.post(
         "/api/v1/orders/cart-checkout",
         headers=headers,
         json={
             "option_ids": [],
+            "address_id": address["id"],
         },
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+async def test_cart_checkout_other_user_address(
+    client: AsyncClient,
+    db: AsyncSession,
+    normal_user: User,
+    normal_user2: User,
+    product_1: Product,
+) -> None:
+    headers = await login(client, normal_user)
+    headers_user2 = await login(client, normal_user2)
+    user2_address = await create_address(client, headers_user2)
+    await add_cart(client, headers, product_1.options[0].id, 1)
+
+    response = await client.post(
+        "/api/v1/orders/cart-checkout",
+        headers=headers,
+        json={
+            "option_ids": [product_1.options[0].id],
+            "address_id": user2_address["id"],
+        },
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    stmt = select(Order).where(Order.user_id == normal_user.id)
+    result = await db.execute(stmt)
+    assert result.scalar_one_or_none() is None

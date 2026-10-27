@@ -23,9 +23,17 @@ router = APIRouter(
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=OrderBuyNowResponse)
 async def buy_now_router(
-    db: DbSession, request: OrderBuyNowRequest, user: User = Depends(get_user)
+    db: DbSession,
+    request: OrderBuyNowRequest,
+    user: User = Depends(get_user),
 ) -> OrderBuyNowResponse:
-    return await order_buy_now(db, user.id, request.option_id, request.quantity)
+    return await order_buy_now(
+        db,
+        request.option_id,
+        request.quantity,
+        request.address_id,
+        user.id,
+    )
 
 
 @router.post("/{order_id}/confirm", status_code=status.HTTP_200_OK, response_model=OrderConfirmResponse)

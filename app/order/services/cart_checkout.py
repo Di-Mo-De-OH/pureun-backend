@@ -3,9 +3,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.address.services.read import get_address
 from app.cart.services.read import get_cart, get_cart_image, get_cart_options
 from app.cart.utils.redis import CartRedis
 from app.core.redis import redis_client
+from app.delivery.services.create import create_delivery
 from app.order.models import Order, OrderItem
 from app.order.schemas.cart_checkout import (
     OrderCartCheckoutItemResponse,
@@ -22,6 +24,7 @@ async def get_cart_products(db: AsyncSession, product_ids: list[str]) -> dict[st
 
 
 async def cart_checkout(db: AsyncSession, user_id: str, request: OrderCartCheckoutRequest) -> OrderCartCheckoutResponse:
+    address = await get_address(db, request.address_id, user_id)
     cart = await get_cart(user_id)
     if not cart:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="장바구니에 등록된 상품이 없습니다.")
@@ -82,6 +85,7 @@ async def cart_checkout(db: AsyncSession, user_id: str, request: OrderCartChecko
     ]
     db.add_all(order_items)
     try:
+        create_delivery(db, order.id, address)
         await db.commit()
     except IntegrityError:
         await db.rollback()
